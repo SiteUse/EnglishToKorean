@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title> <link rel="stylesheet" href="webbg.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            width: 70%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .question-container {
+            display: none;
+        }
+        .question {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .options {
+            text-align: left;
+        }
+        .option {
+            margin: 10px 0;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .timer {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        .result {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .skipped {
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Language Learning Quiz</h1>
+        <div id="start-info">
+            <p>Click "Start" to begin the quiz. You can retake the quiz at any time by clicking "Retake Quiz" after completion.</p>
+            <button class="button" onclick="startQuiz()">Start</button>
+        </div>
+
+        <div id="quiz" class="question-container">
+            <div class="timer" id="timer">Time Remaining: 60:00</div>
+            <form id="quizForm">
+                <div id="questions">
+                    <!-- Questions will be inserted here -->
+                </div>
+                <button type="button" class="button" onclick="submitQuiz()">Submit</button>
+            </form>
+        </div>
+
+        <div id="result-container" style="display:none;">
+            <div class="result" id="score"></div>
+            <button class="button" onclick="retakeQuiz()">Retake Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the Korean translation of the English preposition 'on'?",
+                options: ["에", "위에", "아래", "에서"],
+                answer: "위에"
+            },
+            {
+                question: "How do you say 'under' in Korean?",
+                options: ["아래", "위에", "안에", "밖에"],
+                answer: "아래"
+            },
+            {
+                question: "What does the English preposition 'with' translate to in Korean?",
+                options: ["없이", "함께", "뒤에", "에게"],
+                answer: "함께"
+            },
+            {
+                question: "Which preposition is used in the sentence, 'I am in the room'?",
+                options: ["on", "at", "in", "with"],
+                answer: "in"
+            },
+            {
+                question: "What is the correct translation of 'without' in Korean?",
+                options: ["없이", "함께", "위에", "옆에"],
+                answer: "없이"
+            },
+            {
+                question: "Which of these is the correct translation of 'at' in Korean?",
+                options: ["에서", "위에", "에", "밖에"],
+                answer: "에"
+            },
+            {
+                question: "What is the Korean translation of the preposition 'between'?",
+                options: ["안에", "사이에", "위에", "뒤에"],
+                answer: "사이에"
+            },
+            {
+                question: "How do you say 'behind' in Korean?",
+                options: ["뒤에", "안에", "위에", "아래"],
+                answer: "뒤에"
+            },
+            {
+                question: "Which preposition corresponds to 'near' in Korean?",
+                options: ["가까운", "안에", "밖에", "위에"],
+                answer: "가까운"
+            },
+            {
+                question: "How is 'around' translated into Korean?",
+                options: ["아래", "주위에", "안에", "밖에"],
+                answer: "주위에"
+            },
+            
+    {
+        "question": "How would you translate \"She is reading a book\" into Korean?",
+        "options": [
+            "그녀는 책을 읽고 있다.",
+            "그녀는 책을 쓴다.",
+            "그녀는 책을 본다.",
+            "그녀는 책을 사요."
+        ],
+        "answer": "그녀는 책을 읽고 있다."
+    },
+    {
+        "question": "Which sentence translates to \"I am going to the store\" in Korean?",
+        "options": [
+            "나는 가게에 간다.",
+            "나는 가게에 있다.",
+            "나는 가게에서 간다.",
+            "나는 가게를 가고 있다."
+        ],
+        "answer": "나는 가게에 간다."
+    },
+    {
+        "question": "How do you say \"The dog is in the house\" in Korean?",
+        "options": [
+            "개는 집에 있다.",
+            "개는 집을 가고 있다.",
+            "개는 집을 읽고 있다.",
+            "개는 집 밖에 있다."
+        ],
+        "answer": "개는 집에 있다."
+    },
+    {
+        "question": "Which sentence translates to \"He is studying English\" in Korean?",
+        "options": [
+            "그는 영어를 공부하고 있다.",
+            "그는 영어를 공부하지 않는다.",
+            "그는 영어를 공부했다.",
+            "그는 영어를 공부할 것이다."
+        ],
+        "answer": "그는 영어를 공부하고 있다."
+    },
+    {
+        "question": "How would you translate \"They are playing outside\" into Korean?",
+        "options": [
+            "그들은 밖에서 놀고 있다.",
+            "그들은 밖에서 공부한다.",
+            "그들은 집에서 놀고 있다.",
+            "그들은 밖에서 있다."
+        ],
+        "answer": "그들은 밖에서 놀고 있다."
+    },
+    {
+        "question": "What is the Korean translation for \"I am going home\"?",
+        "options": [
+            "나는 집에 가고 있다.",
+            "나는 집을 간다.",
+            "나는 집을 가고 있다.",
+            "나는 집에서 가고 있다."
+        ],
+        "answer": "나는 집에 가고 있다."
+    },
+    {
+        "question": "How do you say \"She is talking to her friend\" in Korean?",
+        "options": [
+            "그녀는 친구와 이야기하고 있다.",
+            "그녀는 친구에게 이야기하고 있다.",
+            "그녀는 친구와 걷고 있다.",
+            "그녀는 친구에게 이야기한다."
+        ],
+        "answer": "그녀는 친구와 이야기하고 있다."
+    },
+    {
+        "question": "Which is the correct Korean translation for \"I am not hungry\"?",
+        "options": [
+            "나는 배고프지 않다.",
+            "나는 배고프다.",
+            "나는 배고프고 있다.",
+            "나는 배고프지 않다."
+        ],
+        "answer": "나는 배고프지 않다."
+    },
+    {
+        "question": "How do you say \"We are eating dinner\" in Korean?",
+        "options": [
+            "우리는 저녁을 먹고 있다.",
+            "우리는 점심을 먹고 있다.",
+            "우리는 아침을 먹고 있다.",
+            "우리는 저녁을 마시고 있다."
+        ],
+        "answer": "우리는 저녁을 먹고 있다."
+    },
+    {
+        "question": "What is the Korean translation of \"I like reading books\"?",
+        "options": [
+            "나는 책을 읽는 것을 좋아한다.",
+            "나는 책을 좋아하지 않는다.",
+            "나는 책을 쓰는 것을 좋아한다.",
+            "나는 책을 사는 것을 좋아한다."
+        ],
+        "answer": "나는 책을 읽는 것을 좋아한다."
+    },
+    {
+        question: "Which of the following is a correct clause in English?",
+        options: ["I am going to the store", "to the store", "going to the store", "the store"],
+        answer: "I am going to the store"
+    },
+    {
+        question: "What is the Korean translation of the clause 'She likes to dance'?",
+        options: ["그녀는 춤추는 것을 좋아한다.", "그녀는 춤을 좋아한다.", "그녀는 춤을 춘다.", "그녀는 춤을 보고 있다."],
+        answer: "그녀는 춤추는 것을 좋아한다."
+    },
+    {
+        question: "Which clause corresponds to 'They were playing outside' in Korean?",
+        options: ["그들은 밖에서 놀았다.", "그들은 밖에서 놀고 있다.", "그들은 밖에서 논다.", "그들은 밖에서 놀았다."],
+        answer: "그들은 밖에서 놀았다."
+    },
+    {
+        question: "How do you translate the clause 'I am studying' into Korean?",
+        options: ["나는 공부하고 있다.", "나는 공부한다.", "나는 공부하고 있었다.", "나는 공부했다."],
+        answer: "나는 공부하고 있다."
+    },
+    {
+        question: "Which of the following is an example of a dependent clause?",
+        options: ["Because it is raining", "I went to the store", "She sings", "I like music"],
+        answer: "Because it is raining"
+    },
+    {
+        question: "What is the Korean translation of 'I think I can do it'?",
+        options: ["나는 할 수 있을 것 같다.", "나는 할 수 있다.", "나는 그것을 한다고 생각한다.", "나는 그것을 할 수 있다."],
+        answer: "나는 할 수 있을 것 같다."
+    },
+    {
+        question: "Which clause translates to 'He can help you' in Korean?",
+        options: ["그는 너를 도울 수 있다.", "그는 너를 도우고 있다.", "그는 너를 도울 것이다.", "그는 너를 도운다."],
+        answer: "그는 너를 도울 수 있다."
+    },
+    {
+        question: "How is 'She is my friend' translated into Korean?",
+        options: ["그녀는 나의 친구이다.", "그녀는 내 친구가 아니다.", "그녀는 내 친구다.", "그녀는 나의 친구가 아니다."],
+        answer: "그녀는 나의 친구이다."
+    },
+    {
+        question: "What is the correct translation of 'I will call you later' in Korean?",
+        options: ["나는 나중에 너에게 전화할 것이다.", "나는 너에게 전화를 한다.", "나는 너에게 전화할 것이다.", "나는 너에게 전화하지 않을 것이다."],
+        answer: "나는 나중에 너에게 전화할 것이다."
+    },
+    {
+        question: "Which sentence is a correct example of an independent clause?",
+        options: ["I am happy.", "When I go to school.", "Because I am tired.", "Although it is raining."],
+        answer: "I am happy."
+    },
+    {
+        "question": "What is the Korean translation of the gerund 'reading'?",
+        "options": ["읽는 것", "읽다", "읽을", "읽고 있다"],
+        "answer": "읽는 것"
+    },
+    {
+        "question": "How do you say 'to go' (infinitive) in Korean?",
+        "options": ["가다", "가는 것", "갈", "가고 있다"],
+        "answer": "가다"
+    },
+    {
+        "question": "Which is the correct translation of the participle 'running' in Korean?",
+        "options": ["달리는", "달리기", "달렸다", "달릴"],
+        "answer": "달리는"
+    },
+    {
+        "question": "What is the Korean translation of the infinitive 'to see'?",
+        "options": ["보다", "보는 것", "볼", "보고 있다"],
+        "answer": "보다"
+    },
+    {
+        "question": "How is the gerund 'sleeping' translated into Korean?",
+        "options": ["자는 것", "자다", "자고 있다", "잘"],
+        "answer": "자는 것"
+    },
+    {
+        "question": "Which of the following is the participle form of the verb 'eat' in Korean?",
+        "options": ["먹고 있는", "먹는", "먹을", "먹었다"],
+        "answer": "먹는"
+    },
+    {
+        "question": "How is the infinitive 'to study' translated into Korean?",
+        "options": ["공부하다", "공부하는 것", "공부할", "공부하고 있다"],
+        "answer": "공부하다"
+    },
+    {
+        "question": "What is the correct translation of 'writing' (gerund) in Korean?",
+        "options": ["쓰는 것", "쓰다", "쓸", "쓰고 있다"],
+        "answer": "쓰는 것"
+    },
+    {
+        "question": "How do you say 'to dance' (infinitive) in Korean?",
+        "options": ["춤추다", "춤추는 것", "춤출", "춤추고 있다"],
+        "answer": "춤추다"
+    },
+    {
+        "question": "What is the participle form of 'playing' in Korean?",
+        "options": ["놀고 있는", "노는", "놀았다", "놀다"],
+        "answer": "놀고 있는"
+    },
+    {
+        "question": "What is the Korean translation of the idiom 'break the ice'?",
+        "options": ["긴장을 풀다", "얼음을 깨다", "모르는 사람을 만나다", "분위기를 전환하다"],
+        "answer": "긴장을 풀다"
+    },
+    {
+        "question": "How do you say 'kick the bucket' (to die) in Korean?",
+        "options": ["죽다", "떠나다", "다치다", "떠나다"],
+        "answer": "죽다"
+    },
+    {
+        "question": "What is the correct translation for 'under the weather' (to be sick) in Korean?",
+        "options": ["몸이 아프다", "건강하다", "피곤하다", "기분이 좋다"],
+        "answer": "몸이 아프다"
+    },
+    {
+        "question": "How would you translate 'once in a blue moon' (very rarely) into Korean?",
+        "options": ["매우 드물다", "항상", "가끔", "자주"],
+        "answer": "매우 드물다"
+    },
+    {
+        "question": "What is the Korean idiom for 'spill the beans' (to reveal a secret)?",
+        "options": ["비밀을 말하다", "찻잔을 엎지르다", "비밀을 지키다", "감추다"],
+        "answer": "비밀을 말하다"
+    },{
+    question: "How do you say 'a piece of cake' (something easy) in Korean?",
+    options: ["쉬운 일", "작은 조각", "케이크 한 조각", "어려운 일"],
+    answer: "쉬운 일"
+},
+{
+    question: "What does 'go down the wrong path' mean in Korean?",
+    options: ["잘못된 길로 가다", "길을 잃다", "잘 가다", "길을 따라가다"],
+    answer: "잘못된 길로 가다"
+},
+{
+    question: "How is 'the ball is in your court' (it is your turn) translated into Korean?",
+    options: ["공이 네 손에 있다", "공을 던지다", "공을 치다", "공을 잡다"],
+    answer: "공이 네 손에 있다"
+},
+{
+    question: "What is the meaning of 'let the cat out of the bag' (to reveal a secret) in Korean?",
+    options: ["비밀을 누설하다", "고양이를 풀다", "고양이를 숨기다", "고양이를 잡다"],
+    answer: "비밀을 누설하다"
+},
+{
+    question: "How would you translate 'cost an arm and a leg' (to be very expensive) into Korean?",
+    options: ["매우 비싸다", "팔과 다리를 팔다", "비싼 것을 사다", "큰 비용을 들이다"],
+    answer: "매우 비싸다"
+},
+{
+    question: "What is the Korean translation of the word 'happy'?",
+    options: ["슬픈", "행복한", "기쁜", "화난"],
+    answer: "행복한"
+},
+{
+    question: "How do you say 'friend' in Korean?",
+    options: ["친구", "형제", "부모", "선생님"],
+    answer: "친구"
+},
+{
+    question: "What is the correct Korean translation for 'house'?",
+    options: ["집", "학교", "공원", "길"],
+    answer: "집"
+},
+{
+    question: "What is the Korean word for 'food'?",
+    options: ["음료수", "음식", "과일", "물"],
+    answer: "음식"
+},
+{
+    question: "How do you say 'sad' in Korean?",
+    options: ["기쁜", "슬픈", "행복한", "화난"],
+    answer: "슬픈"
+},
+{
+    question: "What is the translation of 'family' into Korean?",
+    options: ["친구", "사람들", "가족", "직장"],
+    answer: "가족"
+},
+{
+    question: "How do you say 'book' in Korean?",
+    options: ["잡지", "책", "노트", "신문"],
+    answer: "책"
+},
+{
+    question: "What is the Korean translation of 'car'?",
+    options: ["차", "버스", "기차", "자전거"],
+    answer: "차"
+},
+{
+    question: "How do you say 'work' in Korean?",
+    options: ["공부", "일", "여행", "휴식"],
+    answer: "일"
+},
+{
+    question: "What is the correct translation for 'phone' in Korean?",
+    options: ["전화기", "컴퓨터", "텔레비전", "라디오"],
+    answer: "전화기"
+}
+        ];
+
+        let timer;
+        let timeLeft = 3600; // 60 minutes in seconds
+        let interval;
+        let answeredQuestions = 0;
+        
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+
+        function startQuiz() {
+            document.getElementById("start-info").style.display = "none";
+            document.getElementById("quiz").style.display = "block";
+            loadQuestions();
+            startTimer();
+        }
+
+        function loadQuestions() {
+            const questionsContainer = document.getElementById("questions");
+            questionsContainer.innerHTML = '';
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.classList.add("question");
+                questionDiv.innerHTML = `
+                    <h3>${index + 1}. ${q.question}</h3>
+                    <div class="options">
+                        ${q.options.map((option, i) => `
+                            <div class="option">
+                                <input type="radio" name="q${index}" value="${option}" id="q${index}o${i}">
+                                <label for="q${index}o${i}">${option}</label>
+                            </div>
+                        `).join('')}
+                        
+                    </div>
+                `;
+                questionsContainer.appendChild(questionDiv);
+            });
+        }
+
+        function startTimer() {
+            interval = setInterval(function() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById("timer").innerHTML = `Time Remaining: ${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+                timeLeft--;
+                if (timeLeft < 0) {
+                    clearInterval(interval);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+         {
+                        document.querySelectorAll(`#q${index} input`).forEach(input => {
+                input.disabled = true;
+            });
+        }
+
+        function submitQuiz() {
+            clearInterval(interval);
+            const form = document.getElementById("quizForm");
+            let selectedAnswers = form.querySelectorAll('input[type="radio"]:checked,uncheked');
+            selectedAnswers.forEach(input => {
+                const questionIndex = input.name.replace('q', '');
+                const question = questions[questionIndex];
+                if (input.value === question.answer) {
+                    correctAnswers++;
+                } else {
+                    incorrectAnswers++;
+                }
+            });
+            document.getElementById("quiz").style.display = "none";
+            document.getElementById("result-container").style.display = "block";
+            document.getElementById("score").innerHTML = `
+                Correct Answers: ${correctAnswers}<br>
+                Incorrect Answers: ${incorrectAnswers}<br>
+                
+            `;
+        }
+
+        function retakeQuiz() {
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            timeLeft = 3600;
+            document.getElementById("result-container").style.display = "none";
+            document.getElementById("quiz").style.display = "block";
+            loadQuestions();
+            startTimer();
+        }
+    </script>
+</body>
+</html>
